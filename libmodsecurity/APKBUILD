@@ -1,0 +1,38 @@
+# Contributor: Alyx Wolcott <alyx@sourcenova.net>
+# Maintainer: Alyx Wolcott <alyx@sourcenova.net>
+pkgname=libmodsecurity
+_pkgname=modsecurity
+# https://github.com/SpiderLabs/ModSecurity/releases/download/v3.0.4/modsecurity-v3.0.4.tar.gz
+pkgver=0.1
+pkgrel=0
+pkgdesc="Web application firewall engine"
+url="https://www.modsecurity.org"
+arch="all"
+license="Apache-2.0"
+depends="yajl libxml2 pcre curl"
+makedepends="autoconf automake byacc curl-dev flex g++ gcc git libc-dev libstdc++ libtool libxml2-dev linux-headers lmdb-dev make pcre-dev yajl-dev"
+install=""
+options="!check"
+subpackages="$pkgname-dev"
+#source="$_pkgname-v$pkgver.tar.gz::https://codeload.github.com/SpiderLabs/ModSecurity/tar.gz/v$pkgver"
+source=""
+_giturl="https://github.com/SpiderLabs/ModSecurity.git"
+builddir="$srcdir"
+
+prepare () {
+	default_prepare
+	git clone "${_giturl}" "${srcdir}/${_pkgname}" || return 1
+	git -C "${srcdir}/${_pkgname}" submodule update --init --recursive || return 1
+}
+
+build() {
+	cd "${srcdir}/${_pkgname}"
+	./build.sh
+	./configure --prefix=/usr
+	make
+}
+
+package() {
+	cd "${srcdir}/${_pkgname}"
+	make DESTDIR="${pkgdir}" install
+}
